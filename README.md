@@ -11,7 +11,7 @@ Internal codename: **NEVERLAND** · Status: **pre-production**
 
 ## About
 
-A boy named Wendy escapes the violence of his home by closing his eyes — and wakes up in Neverland. A children's paradise that, come nightfall, reveals itself as a trap no child has ever escaped.
+A boy named James escapes the violence of his home by closing his eyes — and wakes up in Neverland. A children's paradise that, come nightfall, reveals itself as a trap no child has ever escaped.
 
 No weapons. No combat. Only items, hiding places, puzzles, and the courage of a child who just wants to go home.
 
@@ -32,7 +32,7 @@ No weapons. No combat. Only items, hiding places, puzzles, and the courage of a 
 
 Four pillars drive every decision. If a feature doesn't support at least one of them, it doesn't ship.
 
-1. **Absolute vulnerability** — Wendy is a child. All player power comes from knowledge and items, never force. Fear is born of physical helplessness.
+1. **Absolute vulnerability** — James is a child. All player power comes from knowledge and items, never force. Fear is born of physical helplessness.
 2. **The paradise is the prison** — The island is beautiful by day and monstrous by night. Contrast is the game's primary horror weapon.
 3. **Tension through noise and routine** — Every creaking floorboard calls the hunter. The player learns the house, and the house learns the player.
 4. **Corrupted nostalgia (PS1/VHS)** — The aesthetic isn't a filter: it's a childhood memory degraded like a worn-out tape.
@@ -42,7 +42,7 @@ Four pillars drive every decision. If a feature doesn't support at least one of 
 ## Core systems
 
 ### Close Your Eyes (signature mechanic)
-In the prologue, closing his eyes is how Wendy escapes. In the game, it's how he faces things. Holding the key darkens the screen and sharpens hearing — Tinker Bell's toll becomes precise sonar through walls. The cost is real blindness.
+In the prologue, closing his eyes is how James escapes. In the game, it's how he faces things. Holding the key darkens the screen and sharpens hearing — Tinker Bell's toll becomes precise sonar through walls. The cost is real blindness.
 
 ### Tinker Bell — the hunter
 A sweet guide by day, a 2.4 m huntress by night. Full FSM (Patrol → Investigate → Chase → Return → Capture) with a noise heat map, an honest vision cone (110°, 12 m), and strict fairness rules: never teleports, never spawns in the player's room, every movement audible through her bell.
@@ -70,7 +70,7 @@ A linear chain of five prison-house puzzles, each opening roughly 25% more of th
 | Epilogue | — | 2–3 min |
 
 ### Two endings
-Decided by a single factor: whether Wendy is carrying the **machete** from the butchery when he reaches the cliff. No warning, no meter.
+Decided by a single factor: whether James is carrying the **machete** from the butchery when he reaches the cliff. No warning, no meter.
 
 - **The Waters** (canonical) — with the machete, he cuts off his own hand to break free.
 - **Devoured** — without it, there is no instrument, no prompt, no salvation.
@@ -85,7 +85,7 @@ The bad ending isn't a punishment for skill, but for curiosity not exercised: th
 
 **Sound** — Half the horror is audio. Four adaptive music states driven by stems (Calm · Vigil · Hunt · Finale) with a single leitmotif: the music-box theme, introduced as comfort, corrupted into threat, redeemed in the finale. At least 20% of the night runs with no music at all — silence is budgeted like an asset.
 
-**HUD** — As little screen as possible. No health bar, no stamina bar, no radar. Threat is communicated 100% through sound and light; the quest log is Wendy's pencil notebook.
+**HUD** — As little screen as possible. No health bar, no stamina bar, no radar. Threat is communicated 100% through sound and light; the quest log is James's pencil notebook.
 
 ---
 
