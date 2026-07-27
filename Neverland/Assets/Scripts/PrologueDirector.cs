@@ -2,14 +2,21 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// Orquestra o final do prólogo — O Quarto Real (GDD §2.3, §4.1).
-/// Por ora cobre apenas dois beats, em ordem, via coroutine:
-///   1. A MÃE SAI — a silhueta (cápsula de greybox) caminha da beira da cama
+/// Orquestra o prólogo — O Quarto Real (GDD §2.3, §4.1).
+/// Beats, em ordem, via coroutine:
+///   0. A CHUVA — ambiência em loop, presente desde o primeiro frame.
+///   1. A ORAÇÃO — a mãe recita o Pai-Nosso em primeiro plano (§4.1).
+///   2. A MÃE SAI — a silhueta (cápsula de greybox) caminha da beira da cama
 ///      até a porta.
-///   2. A PORTA FECHA — gira até fechar e a fresta de luz se apaga, deixando o
-///      quarto no breu (§4.1: "a fresta da porta que se apaga quando ela se fecha").
-/// Áudio (oração, briga) e o handoff para o BlinkMechanic entram em passos
-/// futuros — deixei o gancho comentado no fim da sequência.
+///   3. A PORTA FECHA — gira até fechar, o baque seco toca e a fresta de luz
+///      se apaga, deixando o quarto no breu (§4.1); a chuva sobe, porque no
+///      escuro ela é tudo que sobra.
+///   4. A BRIGA — depois de um silêncio deliberado, as vozes atrás da parede
+///      entram e a chuva recua para que elas cortem por cima.
+/// Os AudioSources são referências de cena: espacialização, grupo de mixer e o
+/// AudioLowPassFilter da briga ficam a seu critério no Inspector (§12.1).
+/// Todo slot de áudio é opcional — sem clipe, o beat passa direto.
+/// O handoff para o BlinkMechanic entra em um passo futuro.
 /// Anexar a um GameObject vazio da cena (ex.: "PrologueDirector").
 /// </summary>
 public class PrologueDirector : MonoBehaviour
@@ -56,11 +63,50 @@ public class PrologueDirector : MonoBehaviour
     [Tooltip("Luz da fresta da porta — some conforme a porta fecha (§4.1).")]
     [SerializeField] private Light doorGapLight;
 
+    [Header("Áudio · a chuva (ambiência)")]
+    [Tooltip("AudioSource em loop com a chuva. Ela emoldura o prólogo inteiro — " +
+             "mas nunca deve competir com o baque, com o silêncio ou com as vozes (§11.4).")]
+    [SerializeField] private AudioSource rainLoop;
+    [Tooltip("Volume da chuva enquanto a mãe ainda está no quarto.")]
+    [Range(0f, 1f)][SerializeField] private float rainVolumeStart = 0.35f;
+    [Tooltip("Volume da chuva depois de a porta fechar: no breu, ela é tudo que sobra.")]
+    [Range(0f, 1f)][SerializeField] private float rainVolumeInTheDark = 0.6f;
+    [Tooltip("Volume da chuva durante a briga: recua para as vozes cortarem por cima.")]
+    [Range(0f, 1f)][SerializeField] private float rainVolumeUnderFight = 0.4f;
+    [Tooltip("Duração de cada transição de volume da chuva (segundos).")]
+    [SerializeField] private float rainFadeDuration = 1.5f;
+
+    [Header("Áudio · a oração da mãe")]
+    [Tooltip("AudioSource da mãe — em primeiro plano (§4.1). Pode ser filho da cápsula.")]
+    [SerializeField] private AudioSource motherVoice;
+    [Tooltip("A oração do Pai-Nosso. Vazio: o prólogo segue direto para a espera abaixo.")]
+    [SerializeField] private AudioClip prayerClip;
+
+    [Header("Áudio · o baque da porta")]
+    [Tooltip("AudioSource posicionado na porta.")]
+    [SerializeField] private AudioSource doorAudio;
+    [Tooltip("O baque seco (§2.3) — toca no instante exato em que a porta encosta.")]
+    [SerializeField] private AudioClip doorSlamClip;
+
+    [Header("Áudio · a briga atrás da parede")]
+    [Tooltip("AudioSource posicionado ALÉM da parede/porta. É nele que vai o " +
+             "AudioLowPassFilter: a briga NUNCA pode ser inteligível (§4.1, §2.2).")]
+    [SerializeField] private AudioSource fightAudio;
+    [Tooltip("As vozes alteradas. Vazio: o beat é pulado.")]
+    [SerializeField] private AudioClip fightClip;
+    [Tooltip("O silêncio entre o baque da porta e o primeiro grito. É ele que faz o " +
+             "susto existir — não zere sem pensar (§11.4).")]
+    [SerializeField] private float delayBeforeFight = 3f;
+    [Tooltip("Fade-in da briga: as vozes sobem, não aparecem do nada.")]
+    [SerializeField] private float fightFadeIn = 1f;
+
     private Quaternion doorOpenRotation;   // pose "aberta" em mundo
     private Vector3 doorOpenPosition;
     private Vector3 hingeWorldPos;
     private Vector3 hingeAxis = Vector3.up;
     private float gapLightBaseIntensity;
+    private float fightBaseVolume = 1f;    // volume autorado da briga, alvo do fade-in
+    private Coroutine rainFadeRoutine;     // só um fade de chuva por vez
 
     private void Awake()
     {
@@ -88,6 +134,19 @@ public class PrologueDirector : MonoBehaviour
 
         if (doorGapLight != null)
             gapLightBaseIntensity = doorGapLight.intensity;
+
+        // A chuva já está caindo quando o jogo abre — ela antecede a cena.
+        if (rainLoop != null)
+        {
+            rainLoop.loop = true;
+            rainLoop.volume = rainVolumeStart;
+            if (!rainLoop.isPlaying)
+                rainLoop.Play();
+        }
+
+        // Guarda o volume autorado da briga: é o alvo do fade-in, não 1.
+        if (fightAudio != null)
+            fightBaseVolume = fightAudio.volume;
     }
 
     private void Start()
@@ -97,6 +156,8 @@ public class PrologueDirector : MonoBehaviour
 
     private IEnumerator RunPrologue()
     {
+        yield return Prayer();
+
         yield return new WaitForSeconds(delayBeforeMotherLeaves);
 
         yield return MotherLeaves();
@@ -105,11 +166,30 @@ public class PrologueDirector : MonoBehaviour
 
         yield return DoorCloses();
 
-        // Próximos passos (áudio da briga, fechar os olhos → memórias → ilha)
-        // entram aqui, encadeados após a porta fechar.
+        // A chuva sobe DURANTE o silêncio que se segue ao baque — por isso não
+        // esperamos o fade terminar aqui.
+        FadeRainTo(rainVolumeInTheDark);
+
+        yield return Fight();
+
+        // Próximo passo (fechar os olhos → memórias → ilha) entra aqui,
+        // encadeado depois de a briga começar.
     }
 
-    // Beat 1 — a mãe caminha até a porta e sai de cena.
+    // Beat 1 — a mãe recita o Pai-Nosso, em primeiro plano (§4.1).
+    private IEnumerator Prayer()
+    {
+        if (motherVoice == null || prayerClip == null)
+            yield break;
+
+        motherVoice.clip = prayerClip;
+        motherVoice.Play();
+
+        while (motherVoice.isPlaying)
+            yield return null;
+    }
+
+    // Beat 2 — a mãe caminha até a porta e sai de cena.
     private IEnumerator MotherLeaves()
     {
         if (mother == null || motherExitPoint == null)
@@ -138,7 +218,7 @@ public class PrologueDirector : MonoBehaviour
             mother.gameObject.SetActive(false);
     }
 
-    // Beat 2 — a porta gira até fechar; a fresta de luz apaga junto.
+    // Beat 3 — a porta gira até fechar; o baque seco toca e a fresta de luz apaga junto.
     private IEnumerator DoorCloses()
     {
         if (door == null)
@@ -160,11 +240,70 @@ public class PrologueDirector : MonoBehaviour
 
         ApplyDoorAngle(doorCloseAngle);
 
+        // O baque seco cai no frame em que a porta encosta — nem antes, nem depois.
+        if (doorAudio != null && doorSlamClip != null)
+            doorAudio.PlayOneShot(doorSlamClip);
+
         if (doorGapLight != null)
         {
             doorGapLight.intensity = 0f;
             doorGapLight.enabled = false; // breu total
         }
+    }
+
+    // Beat 4 — depois do silêncio, as vozes atrás da parede (§2.3).
+    private IEnumerator Fight()
+    {
+        yield return new WaitForSeconds(delayBeforeFight);
+
+        if (fightAudio == null || fightClip == null)
+            yield break;
+
+        // A chuva recua no mesmo movimento em que a briga sobe.
+        FadeRainTo(rainVolumeUnderFight);
+
+        fightAudio.clip = fightClip;
+        fightAudio.volume = 0f;
+        fightAudio.Play();
+
+        float elapsed = 0f;
+        while (elapsed < fightFadeIn)
+        {
+            elapsed += Time.deltaTime;
+            fightAudio.volume = Mathf.Lerp(0f, fightBaseVolume, elapsed / fightFadeIn);
+            yield return null;
+        }
+
+        fightAudio.volume = fightBaseVolume;
+    }
+
+    // Troca o volume da chuva sem travar a sequência, cancelando um fade anterior
+    // (dois fades simultâneos brigariam pelo mesmo volume).
+    private void FadeRainTo(float target)
+    {
+        if (rainLoop == null)
+            return;
+
+        if (rainFadeRoutine != null)
+            StopCoroutine(rainFadeRoutine);
+
+        rainFadeRoutine = StartCoroutine(FadeRain(target));
+    }
+
+    private IEnumerator FadeRain(float target)
+    {
+        float from = rainLoop.volume;
+        float elapsed = 0f;
+
+        while (elapsed < rainFadeDuration)
+        {
+            elapsed += Time.deltaTime;
+            rainLoop.volume = Mathf.Lerp(from, target, elapsed / rainFadeDuration);
+            yield return null;
+        }
+
+        rainLoop.volume = target;
+        rainFadeRoutine = null;
     }
 
     // Reposiciona a porta na pose "aberta" e a gira 'angle' graus a partir dela.
