@@ -27,6 +27,10 @@ public class BlinkMechanic : MonoBehaviour
     // 0 = olhos totalmente abertos, 1 = totalmente fechados.
     private float closeAmount = 0f;
 
+    // Enquanto travado, o input é ignorado e as pálpebras obedecem lockedClosed.
+    private bool locked = false;
+    private bool lockedClosed = true;
+
     void Start()
     {
         closeAmount = 0f;
@@ -36,7 +40,8 @@ public class BlinkMechanic : MonoBehaviour
     void Update()
     {
         // Segurando a tecla: fecha. Soltando: abre.
-        bool isBlinking = Input.GetKey(blinkKey);
+        // Travado: o roteiro manda, não o jogador.
+        bool isBlinking = locked ? lockedClosed : Input.GetKey(blinkKey);
         float target = isBlinking ? 1f : 0f;
         float speed = isBlinking ? closeSpeed : openSpeed;
 
@@ -56,4 +61,31 @@ public class BlinkMechanic : MonoBehaviour
 
     /// <summary>True quando as pálpebras estão totalmente fechadas.</summary>
     public bool EyesClosed => closeAmount >= 1f;
+
+    /// <summary>Quanto os olhos estão fechados: 0 = abertos, 1 = fechados.</summary>
+    public float CloseAmount => closeAmount;
+
+    /// <summary>
+    /// A tecla de fechar os olhos, para quem precisa reagir a ela sem duplicar
+    /// a configuração — ex.: o PrologueEscape, que trata o primeiro toque
+    /// depois da briga como definitivo.
+    /// </summary>
+    public KeyCode BlinkKey => blinkKey;
+
+    /// <summary>
+    /// Tira o controle das pálpebras do jogador e as leva para fechadas (ou
+    /// abertas). Para quando o roteiro assume a cena — ex.: a travessia para o
+    /// Dia, em que os olhos precisam ficar fechados durante o escuro.
+    /// </summary>
+    public void LockEyes(bool closed)
+    {
+        locked = true;
+        lockedClosed = closed;
+    }
+
+    /// <summary>Devolve as pálpebras ao jogador.</summary>
+    public void UnlockEyes()
+    {
+        locked = false;
+    }
 }

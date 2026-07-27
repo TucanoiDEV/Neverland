@@ -107,6 +107,18 @@ public class PrologueDirector : MonoBehaviour
     private float gapLightBaseIntensity;
     private float fightBaseVolume = 1f;    // volume autorado da briga, alvo do fade-in
     private Coroutine rainFadeRoutine;     // só um fade de chuva por vez
+    private float fightStartTime = -1f;    // Time.time em que as vozes entraram
+
+    /// <summary>True a partir do instante em que a briga começa (§2.3).</summary>
+    public bool FightHasStarted => fightStartTime >= 0f;
+
+    /// <summary>
+    /// Segundos de briga já escutados — o relógio do prólogo. Retorna -1 antes
+    /// de as vozes entrarem. O PrologueEscape só arma a fuga a partir de um
+    /// mínimo: Wendy (e o jogador) tem que ficar ali, ouvindo.
+    /// </summary>
+    public float SecondsSinceFightStarted =>
+        FightHasStarted ? Time.time - fightStartTime : -1f;
 
     private void Awake()
     {
@@ -256,6 +268,10 @@ public class PrologueDirector : MonoBehaviour
     {
         yield return new WaitForSeconds(delayBeforeFight);
 
+        // O relógio da escuta começa aqui, com ou sem clipe: em greybox mudo o
+        // prólogo ainda precisa poder terminar.
+        fightStartTime = Time.time;
+
         if (fightAudio == null || fightClip == null)
             yield break;
 
@@ -275,6 +291,50 @@ public class PrologueDirector : MonoBehaviour
         }
 
         fightAudio.volume = fightBaseVolume;
+    }
+
+    /// <summary>
+    /// Afunda o quarto no silêncio — chuva, briga e voz da mãe — em 'duration'
+    /// segundos. É o que o PrologueEscape chama quando Wendy fecha os olhos
+    /// para valer: o mundo real some antes da ilha aparecer (§2.3).
+    /// Encerra a sequência do prólogo: depois daqui não há mais beats.
+    /// </summary>
+    public void FadeEverythingOut(float duration)
+    {
+        StopAllCoroutines();   // a sequência acabou; nenhum beat pode voltar
+        rainFadeRoutine = null;
+        StartCoroutine(FadeOutAll(duration));
+    }
+
+    private IEnumerator FadeOutAll(float duration)
+    {
+        AudioSource[] sources = { rainLoop, fightAudio, motherVoice };
+        float[] from = new float[sources.Length];
+
+        for (int i = 0; i < sources.Length; i++)
+            from[i] = sources[i] != null ? sources[i].volume : 0f;
+
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float k = duration > 0f ? Mathf.Clamp01(elapsed / duration) : 1f;
+
+            for (int i = 0; i < sources.Length; i++)
+                if (sources[i] != null)
+                    sources[i].volume = Mathf.Lerp(from[i], 0f, k);
+
+            yield return null;
+        }
+
+        foreach (AudioSource src in sources)
+        {
+            if (src == null)
+                continue;
+
+            src.volume = 0f;
+            src.Stop();
+        }
     }
 
     // Troca o volume da chuva sem travar a sequência, cancelando um fade anterior
