@@ -122,6 +122,156 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &699430
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 699435}
+  - component: {fileID: 699434}
+  - component: {fileID: 699433}
+  - component: {fileID: 699432}
+  - component: {fileID: 699431}
+  m_Layer: 0
+  m_Name: SilhouttePeterPan
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &699431
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 699430}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aaa8714404e164649b4b57283da47a25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  director: {fileID: 1708765800}
+  playerCamera: {fileID: 875106846}
+  blink: {fileID: 875106850}
+  appearAfterFightSeconds: 3
+  onlyAppearWhenUnseen: 1
+  blinkCountsAsUnseenAt: 0.6
+  maxWaitForUnseen: 8
+  facePlayerOnAppear: 1
+  fadeInDuration: 0
+  fadeOutDuration: 0
+  appearAudio: {fileID: 0}
+  appearClip: {fileID: 0}
+  onAppear:
+    m_PersistentCalls:
+      m_Calls: []
+  onVanish:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 699431}
+        m_TargetAssemblyTypeName: PrologueSilhouette, Assembly-CSharp
+        m_MethodName: Vanish
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!136 &699432
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 699430}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!23 &699433
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 699430}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &699434
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 699430}
+  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!4 &699435
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 699430}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.059, y: 0.501, z: 0.70889187}
+  m_LocalScale: {x: 0.39189, y: 0.5652331, z: 0.39189}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &36221546
 GameObject:
   m_ObjectHideFlags: 0
@@ -12284,7 +12434,7 @@ MonoBehaviour:
   doorAudio: {fileID: 1327350267}
   doorSlamClip: {fileID: 8300000, guid: 696d455e9a95f694f81dbde097b26342, type: 3}
   fightAudio: {fileID: 1826510266}
-  fightClip: {fileID: 8300000, guid: f812b10f07e436943a1d1d0587d6caf6, type: 3}
+  fightClip: {fileID: 8300000, guid: 9d20e3706cff2d24581e1c4b0b1d0529, type: 3}
   delayBeforeFight: 2
   fightFadeIn: 1
 --- !u!4 &1708765801
@@ -12316,14 +12466,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   director: {fileID: 1708765800}
   blink: {fileID: 875106850}
-  minListenSeconds: 1
+  minListenSeconds: 15
   blockBlinkBeforeGate: 0
   autoCloseSeconds: 30
   daySceneName: Island_Day
   audioFadeOut: 2
-  secondsInTheDark: 3
+  secondsInTheDark: 5
   whisperAudio: {fileID: 1708765803}
-  whisperClip: {fileID: 0}
+  whisperClip: {fileID: 8300000, guid: 6716a8d520c46f14b8191311a1926381, type: 3}
   delayBeforeWhisper: 1
   onEscapeBegin:
     m_PersistentCalls:
@@ -12338,7 +12488,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: c4162ec7fe1e04f45a6630534c280ebf, type: 3}
+  m_audioClip: {fileID: 8300000, guid: 6716a8d520c46f14b8191311a1926381, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -13264,6 +13414,7 @@ SceneRoots:
   - {fileID: 298845927}
   - {fileID: 1009283654}
   - {fileID: 1718687277}
+  - {fileID: 699435}
   - {fileID: 1655787643}
   - {fileID: 2030482460}
   - {fileID: 1708765801}
