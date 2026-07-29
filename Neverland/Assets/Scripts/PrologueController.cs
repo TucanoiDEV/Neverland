@@ -1,6 +1,6 @@
 using UnityEngine;
 
-/// <summary>
+/// <summary>   
 /// Controlador do prólogo — O Quarto Real (GDD §4.1).
 /// Cobre apenas os dois verbos essenciais deste momento: OLHAR (free-look
 /// limitado — o Wendy está deitado na cama, não anda) e ENCOLHER-SE NA CAMA

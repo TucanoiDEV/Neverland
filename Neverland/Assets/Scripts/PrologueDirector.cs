@@ -4,7 +4,9 @@ using UnityEngine;
 /// <summary>
 /// Orquestra o prólogo — O Quarto Real (GDD §2.3, §4.1).
 /// Beats, em ordem, via coroutine:
-///   0. A CHUVA — ambiência em loop, presente desde o primeiro frame.
+///   0. A CHUVA e A MÚSICA — dois loops presentes desde o primeiro frame. Não
+///      são beats: são o chão em que os beats acontecem. Ambos recuam e sobem
+///      conforme a cena pede, e ambos morrem no fade final.
 ///   1. A ORAÇÃO — a mãe recita o Pai-Nosso em primeiro plano (§4.1).
 ///   2. A MÃE SAI — a silhueta (cápsula de greybox) caminha da beira da cama
 ///      até a porta.
@@ -76,6 +78,28 @@ public class PrologueDirector : MonoBehaviour
     [Tooltip("Duração de cada transição de volume da chuva (segundos).")]
     [SerializeField] private float rainFadeDuration = 1.5f;
 
+    [Header("Áudio · a música de fundo")]
+    [Tooltip("AudioSource em loop com a música do prólogo. Como a chuva, ela nasce " +
+             "junto com a cena — mas mora embaixo de tudo: o baque, o silêncio e as " +
+             "vozes vêm primeiro (§11.4). Deixe 2D (Spatial Blend 0) e, de " +
+             "preferência, num grupo de mixer separado do ambiente.")]
+    [SerializeField] private AudioSource musicLoop;
+    [Tooltip("Volume da música enquanto a mãe ainda está no quarto.")]
+    [Range(0f, 1f)][SerializeField] private float musicVolumeStart = 0.25f;
+    [Tooltip("Volume da música depois de a porta fechar — o breu é dela e da chuva.")]
+    [Range(0f, 1f)][SerializeField] private float musicVolumeInTheDark = 0.3f;
+    [Tooltip("Volume da música durante a briga: recua junto com a chuva para as " +
+             "vozes cortarem por cima.")]
+    [Range(0f, 1f)][SerializeField] private float musicVolumeUnderFight = 0.15f;
+    [Tooltip("Duração de cada transição de volume da música (segundos).")]
+    [SerializeField] private float musicFadeDuration = 1.5f;
+    [Tooltip("Marcado (padrão): a música NÃO morre junto com o quarto no fade final — " +
+             "ela atravessa o escuro e segura o sussurro por baixo. É o certo quando " +
+             "a música pertence à memória (o chiado de VHS) e não ao quarto: o que " +
+             "afunda no silêncio é a chuva, a briga e a mãe. Quem a desliga passa a " +
+             "ser o corte de cena. Desmarcado: some junto com o resto.")]
+    [SerializeField] private bool musicSurvivesRoomFade = true;
+
     [Header("Áudio · a oração da mãe")]
     [Tooltip("AudioSource da mãe — em primeiro plano (§4.1). Pode ser filho da cápsula.")]
     [SerializeField] private AudioSource motherVoice;
@@ -107,6 +131,7 @@ public class PrologueDirector : MonoBehaviour
     private float gapLightBaseIntensity;
     private float fightBaseVolume = 1f;    // volume autorado da briga, alvo do fade-in
     private Coroutine rainFadeRoutine;     // só um fade de chuva por vez
+    private Coroutine musicFadeRoutine;    // idem para a música
     private float fightStartTime = -1f;    // Time.time em que as vozes entraram
 
     /// <summary>True a partir do instante em que a briga começa (§2.3).</summary>
@@ -156,6 +181,16 @@ public class PrologueDirector : MonoBehaviour
                 rainLoop.Play();
         }
 
+        // A música entra junto, no mesmo primeiro frame: ela não é um beat, é o
+        // chão em que os beats acontecem.
+        if (musicLoop != null)
+        {
+            musicLoop.loop = true;
+            musicLoop.volume = musicVolumeStart;
+            if (!musicLoop.isPlaying)
+                musicLoop.Play();
+        }
+
         // Guarda o volume autorado da briga: é o alvo do fade-in, não 1.
         if (fightAudio != null)
             fightBaseVolume = fightAudio.volume;
@@ -179,8 +214,9 @@ public class PrologueDirector : MonoBehaviour
         yield return DoorCloses();
 
         // A chuva sobe DURANTE o silêncio que se segue ao baque — por isso não
-        // esperamos o fade terminar aqui.
+        // esperamos o fade terminar aqui. A música acompanha o mesmo movimento.
         FadeRainTo(rainVolumeInTheDark);
+        FadeMusicTo(musicVolumeInTheDark);
 
         yield return Fight();
 
@@ -275,8 +311,9 @@ public class PrologueDirector : MonoBehaviour
         if (fightAudio == null || fightClip == null)
             yield break;
 
-        // A chuva recua no mesmo movimento em que a briga sobe.
+        // Chuva e música recuam no mesmo movimento em que a briga sobe.
         FadeRainTo(rainVolumeUnderFight);
+        FadeMusicTo(musicVolumeUnderFight);
 
         fightAudio.clip = fightClip;
         fightAudio.volume = 0f;
@@ -297,18 +334,25 @@ public class PrologueDirector : MonoBehaviour
     /// Afunda o quarto no silêncio — chuva, briga e voz da mãe — em 'duration'
     /// segundos. É o que o PrologueEscape chama quando Wendy fecha os olhos
     /// para valer: o mundo real some antes da ilha aparecer (§2.3).
+    /// A música só vai junto se 'musicSurvivesRoomFade' estiver desmarcado;
+    /// marcado, ela continua tocando por baixo do escuro e do sussurro.
     /// Encerra a sequência do prólogo: depois daqui não há mais beats.
     /// </summary>
     public void FadeEverythingOut(float duration)
     {
         StopAllCoroutines();   // a sequência acabou; nenhum beat pode voltar
         rainFadeRoutine = null;
+        musicFadeRoutine = null;
         StartCoroutine(FadeOutAll(duration));
     }
 
     private IEnumerator FadeOutAll(float duration)
     {
-        AudioSource[] sources = { rainLoop, fightAudio, motherVoice };
+        // A música só entra na lista se ela for do quarto. Sendo da memória, ela
+        // fica tocando por baixo do escuro — e é o corte de cena que a encerra.
+        AudioSource[] sources = musicSurvivesRoomFade
+            ? new[] { rainLoop, fightAudio, motherVoice }
+            : new[] { rainLoop, musicLoop, fightAudio, motherVoice };
         float[] from = new float[sources.Length];
 
         for (int i = 0; i < sources.Length; i++)
@@ -347,23 +391,35 @@ public class PrologueDirector : MonoBehaviour
         if (rainFadeRoutine != null)
             StopCoroutine(rainFadeRoutine);
 
-        rainFadeRoutine = StartCoroutine(FadeRain(target));
+        rainFadeRoutine = StartCoroutine(FadeVolume(rainLoop, target, rainFadeDuration));
     }
 
-    private IEnumerator FadeRain(float target)
+    // Mesma ideia, para a música: cada uma tem seu próprio fade em curso, para
+    // que um beat que mexe só na chuva não interrompa o fade da música.
+    private void FadeMusicTo(float target)
     {
-        float from = rainLoop.volume;
+        if (musicLoop == null)
+            return;
+
+        if (musicFadeRoutine != null)
+            StopCoroutine(musicFadeRoutine);
+
+        musicFadeRoutine = StartCoroutine(FadeVolume(musicLoop, target, musicFadeDuration));
+    }
+
+    private IEnumerator FadeVolume(AudioSource source, float target, float duration)
+    {
+        float from = source.volume;
         float elapsed = 0f;
 
-        while (elapsed < rainFadeDuration)
+        while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            rainLoop.volume = Mathf.Lerp(from, target, elapsed / rainFadeDuration);
+            source.volume = Mathf.Lerp(from, target, elapsed / duration);
             yield return null;
         }
 
-        rainLoop.volume = target;
-        rainFadeRoutine = null;
+        source.volume = target;
     }
 
     // Reposiciona a porta na pose "aberta" e a gira 'angle' graus a partir dela.
