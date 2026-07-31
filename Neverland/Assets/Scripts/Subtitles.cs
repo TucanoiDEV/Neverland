@@ -107,8 +107,12 @@ public class Subtitles : MonoBehaviour
              "dispensadas assim — só têm a escrita acelerada — senão a voz " +
              "continuaria tocando sem legenda.")]
     [SerializeField] private bool allowSkip = true;
-    [Tooltip("Tecla de pular/avançar.")]
-    [SerializeField] private KeyCode skipKey = KeyCode.Space;
+    [Tooltip("Tecla de pular/avançar. NÃO usar Espaço: é a tecla de fechar os olhos " +
+             "(BlinkMechanic.blinkKey), a mecânica central do jogo — o jogador " +
+             "piscaria toda vez que quisesse avançar uma fala, e vice-versa. " +
+             "Também deixar fora a tecla de interagir, senão abrir uma porta come a " +
+             "legenda que ela mesma dispara.")]
+    [SerializeField] private KeyCode skipKey = KeyCode.Return;
 
     // Uma fala na fila. 'duration' negativa = calcular pelo tamanho do texto.
     private struct Line
