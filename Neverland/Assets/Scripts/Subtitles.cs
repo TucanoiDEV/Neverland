@@ -134,6 +134,25 @@ public class Subtitles : MonoBehaviour
     /// <summary>True enquanto houver alguma fala escrevendo ou na tela.</summary>
     public bool IsShowing => runner != null;
 
+    /// <summary>
+    /// Liga/desliga o pular por código, sem perder o que foi autorado no
+    /// Inspector. Existe por causa de uma colisão de teclas real: Enter pula a
+    /// legenda E confirma a escolha de diálogo (DialogueChoiceUI). Enquanto a
+    /// caixa de escolha está aberta, o DialogueRunner desliga isto — do
+    /// contrário um único toque pularia a fala e confirmaria a opção no mesmo
+    /// frame, e o jogador teria escolhido sem ler.
+    /// </summary>
+    public bool SkipEnabled
+    {
+        get => allowSkip;
+        set
+        {
+            allowSkip = value;
+            if (!value)
+                skipRequested = false;
+        }
+    }
+
     /// <summary>Legendas ligadas? Desligar limpa o que estiver na tela (§9.1).</summary>
     public bool Enabled
     {

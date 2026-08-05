@@ -24,6 +24,13 @@ public class BlinkMechanic : MonoBehaviour
     [Tooltip("Quão rápido os olhos abrem (fração por segundo).")]
     [SerializeField] private float openSpeed = 6f;
 
+    [Tooltip("Marcado: a cena ABRE com os olhos já fechados, sem animação. É o " +
+             "estado do James chegando na ilha — ele fechou os olhos no quarto " +
+             "real e é o jogador quem os abre do outro lado. Sem isso, o campo " +
+             "dourado piscaria na tela por meio segundo antes de as pálpebras " +
+             "encostarem, e a manhã começaria pelo fim.")]
+    [SerializeField] private bool startClosed = false;
+
     // 0 = olhos totalmente abertos, 1 = totalmente fechados.
     private float closeAmount = 0f;
 
@@ -31,9 +38,16 @@ public class BlinkMechanic : MonoBehaviour
     private bool locked = false;
     private bool lockedClosed = true;
 
+    void Awake()
+    {
+        // A pose inicial é resolvida no Awake, e não no Start, para que qualquer
+        // diretor de cena possa mandar nas pálpebras no próprio Start dele sem
+        // depender de quem roda primeiro.
+        closeAmount = startClosed ? 1f : 0f;
+    }
+
     void Start()
     {
-        closeAmount = 0f;
         ApplyEyelids();
     }
 
@@ -87,5 +101,16 @@ public class BlinkMechanic : MonoBehaviour
     public void UnlockEyes()
     {
         locked = false;
+    }
+
+    /// <summary>
+    /// Põe as pálpebras na pose pedida NA HORA, sem animação — e sem travá-las.
+    /// Para corte de cena e para spawn: a manhã na ilha começa com os olhos
+    /// fechados, e o jogador é quem os abre.
+    /// </summary>
+    public void SnapEyes(bool closed)
+    {
+        closeAmount = closed ? 1f : 0f;
+        ApplyEyelids();
     }
 }
