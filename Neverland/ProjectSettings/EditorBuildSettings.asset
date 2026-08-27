@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/_Project/Scenes/Prologue/Prologue.unity
+    guid: c220402ab3e11804787fe0593e9e208c
+  - enabled: 1
     path: Assets/_Project/Scenes/Day/Island_Day.unity
     guid: 99c9720ab356a0642a771bea13969a05
   m_configObjects: {}

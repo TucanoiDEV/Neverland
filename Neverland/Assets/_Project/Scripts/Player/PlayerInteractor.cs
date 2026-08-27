@@ -63,6 +63,14 @@ public class PlayerInteractor : MonoBehaviour
     public bool TargetInReach => target != null && targetDistance <= interactRange;
 
     /// <summary>
+    /// A tecla de interagir, para quem precisa ESCREVER o nome dela na tela
+    /// sem duplicar a configuração — hoje o InteractPrompt. Mesma razão do
+    /// BlinkMechanic.BlinkKey: se o jogador remapear a tecla, o texto tem que
+    /// acompanhar sozinho.
+    /// </summary>
+    public KeyCode InteractKey => interactKey;
+
+    /// <summary>
     /// Progresso da interação lenta, de 0 a 1 — o preenchimento do retículo.
     /// </summary>
     public float SlowProgress =>
