@@ -138,7 +138,7 @@ public class Subtitles : MonoBehaviour
     /// Liga/desliga o pular por código, sem perder o que foi autorado no
     /// Inspector. Existe por causa de uma colisão de teclas real: Enter pula a
     /// legenda E confirma a escolha de diálogo (DialogueChoiceUI). Enquanto a
-    /// caixa de escolha está aberta, o DialogueRunner desliga isto — do
+    /// caixa de escolha está aberta, o NpcConversation desliga isto — do
     /// contrário um único toque pularia a fala e confirmaria a opção no mesmo
     /// frame, e o jogador teria escolhido sem ler.
     /// </summary>
